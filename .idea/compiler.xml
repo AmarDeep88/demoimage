@@ -28,10 +28,10 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="demoimageweb" target="1.7" />
-      <module name="demoimageweb-production" target="1.7" />
-      <module name="demoimageweb-ui" target="1.7" />
-      <module name="demoimageweb-widgetset" target="1.7" />
+      <module name="demoimageweb" target="1.5" />
+      <module name="demoimageweb-production" target="1.5" />
+      <module name="demoimageweb-ui" target="1.5" />
+      <module name="demoimageweb-widgetset" target="1.5" />
     </bytecodeTargetLevel>
   </component>
 </project>

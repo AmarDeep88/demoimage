@@ -10,6 +10,7 @@ import backend.ecodex.org._1_1.SendRequest;
 import backend.ecodex.org._1_1.SendResponse;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
+import com.vaadin.annotations.Viewport;
 import com.vaadin.annotations.Widgetset;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
@@ -39,6 +40,7 @@ import org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
  * The UI is initialized using {@link #init(VaadinRequest)}. This method is intended to be
  * overridden to add component to the user interface and initialize non-component functionality.
  */
+@Viewport("user-scalable=no,initial-scale=1.0")
 @Theme("mytheme")
 @Widgetset("eu.domibus.demoimageweb.MyAppWidgetset")
 public class MainUI extends UI {
