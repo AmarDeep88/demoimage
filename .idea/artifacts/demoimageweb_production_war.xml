@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="demoimageweb-production:war">
+    <output-path>$PROJECT_DIR$/demoimageweb-production/target</output-path>
+    <root id="archive" name="demoimageweb-production-1.0-SNAPSHOT.war">
+      <element id="artifact" artifact-name="demoimageweb-production:war exploded" />
+    </root>
+  </artifact>
+</component>

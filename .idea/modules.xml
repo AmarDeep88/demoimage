@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/demoimageweb.iml" filepath="$PROJECT_DIR$/demoimageweb.iml" />
+      <module fileurl="file://$PROJECT_DIR$/demoimageweb-production/demoimageweb-production.iml" filepath="$PROJECT_DIR$/demoimageweb-production/demoimageweb-production.iml" />
+      <module fileurl="file://$PROJECT_DIR$/demoimageweb-ui/demoimageweb-ui.iml" filepath="$PROJECT_DIR$/demoimageweb-ui/demoimageweb-ui.iml" />
+      <module fileurl="file://$PROJECT_DIR$/demoimageweb-widgetset/demoimageweb-widgetset.iml" filepath="$PROJECT_DIR$/demoimageweb-widgetset/demoimageweb-widgetset.iml" />
+    </modules>
+  </component>
+</project>
