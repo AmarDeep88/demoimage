@@ -1,19 +1,109 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
-    <persistence-unit name="customerdb" transaction-type="JTA">
-        <!-- In modern Java EE servers you can omit data source during development,
-        server will generate a test database automatically for you. 
-        For production deployment you'll want to configure data source in your 
-        app server and poin it to your database. -->
-        <jta-data-source>java:/jboss/datasources/customerdb</jta-data-source>
-        <!--
+<!--
+  ~ Copyright 2015 e-CODEX Project
+  ~
+  ~ Licensed under the EUPL, Version 1.1 or – as soon they
+  ~ will be approved by the European Commission - subsequent
+  ~ versions of the EUPL (the "Licence");
+  ~ You may not use this work except in compliance with the
+  ~ Licence.
+  ~ You may obtain a copy of the Licence at:
+  ~ http://ec.europa.eu/idabc/eupl5
+  ~ Unless required by applicable law or agreed to in
+  ~ writing, software distributed under the Licence is
+  ~ distributed on an "AS IS" basis,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  ~ express or implied.
+  ~ See the Licence for the specific language governing
+  ~ permissions and limitations under the Licence.
+  -->
+
+<persistence xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             version="2.0"
+             xmlns="http://java.sun.com/xml/ns/persistence"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
+  http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+
+    <persistence-unit name="domibusJTA" transaction-type="RESOURCE_LOCAL">
+
+        <provider>org.hibernate.ejb.HibernatePersistence</provider>
+        <class>eu.domibus.common.model.configuration.Action</class>
+        <class>eu.domibus.common.model.configuration.Agreement</class>
+        <class>eu.domibus.common.model.configuration.Binding</class>
+        <class>eu.domibus.common.model.configuration.BusinessProcesses</class>
+        <class>eu.domibus.common.model.configuration.Configuration</class>
+        <class>eu.domibus.common.model.configuration.ErrorHandling</class>
+        <class>eu.domibus.common.model.configuration.Identifier</class>
+        <class>eu.domibus.common.model.configuration.LegConfiguration</class>
+        <class>eu.domibus.common.model.configuration.Mep</class>
+        <class>eu.domibus.common.model.configuration.Mpc</class>
+        <class>eu.domibus.common.model.configuration.Party</class>
+        <class>eu.domibus.common.model.configuration.PartyIdType</class>
+        <class>eu.domibus.common.model.configuration.Payload</class>
+        <class>eu.domibus.common.model.configuration.PayloadProfile</class>
+        <class>eu.domibus.common.model.configuration.Process</class>
+        <class>eu.domibus.common.model.configuration.Property</class>
+        <class>eu.domibus.common.model.configuration.PropertySet</class>
+        <class>eu.domibus.common.model.configuration.ReceptionAwareness</class>
+        <class>eu.domibus.common.model.configuration.Reliability</class>
+        <class>eu.domibus.common.model.configuration.Role</class>
+        <class>eu.domibus.common.model.configuration.Security</class>
+        <class>eu.domibus.common.model.configuration.Service</class>
+        <class>eu.domibus.common.model.logging.ErrorLogEntry</class>
+        <class>eu.domibus.common.model.logging.MessageLogEntry</class>
+        <class>eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Error</class>
+        <class>eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.MessageInfo</class>
+        <class>eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging</class>
+        <class>eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.PartInfo</class>
+        <class>eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.PartyId</class>
+        <class>eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Property</class>
+        <class>eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Receipt</class>
+        <class>eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.SignalMessage</class>
+        <class>eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.UserMessage</class>
+        <class>eu.domibus.plugin.routing.BackendFilter</class>
+        <class>eu.domibus.plugin.routing.RoutingCriteria</class>
+
         <properties>
-            <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
-            <property name="openjpa.jdbc.SynchronizeMappings" value="buildSchema(ForeignKeys=true)"/>
+
+            <!--
+            <property name="hibernate.transaction.manager_lookup_class"
+                      value="com.atomikos.icatch.jta.hibernate3.TransactionManagerLookup"/>
+                      -->
+
+
+            <property name="hibernate.archive.autodetection" value="class"/>
+            <property name="hibernate.ConnectionReleaseMode" value="after_statement"/>
+
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>
+            <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
             <property name="hibernate.show_sql" value="true"/>
-            <property name="eclipselink.logging.level" value="FINE"/>
-            <property name="openjpa.Log" value="DefaultLevel=WARN, Runtime=INFO, Tool=INFO, SQL=TRACE"/>
+            <property name="hibernate.connection.username" value="domibus_blue"/>
+            <property name="hibernate.connection.password" value="Domibus.123"/>
+            <property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/domibus_blue"/>
+            <property name="hibernate.max_fetch_depth" value="3"/>
+
+            <property name="hibernate.hbm2ddl.auto" value="non" />
+
+            <!--
+            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost/domibus_blue" />
+            <property name="javax.persistence.jdbc.user" value="domibus_blue" />
+            <property name="javax.persistence.jdbc.password" value="Domibus.123" />
+            <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
+
+
+            <property name="hibernate.show_sql" value="true" />
+            <property name="hibernate.format_sql" value="true" />
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
+            <property name="hibernate.hbm2ddl.auto" value="validate" />
+
+            -->
+            <!-- Configuring Connection Pool -->
+            <property name="hibernate.c3p0.min_size" value="5" />
+            <property name="hibernate.c3p0.max_size" value="20" />
+            <property name="hibernate.c3p0.timeout" value="500" />
+            <property name="hibernate.c3p0.max_statements" value="50" />
+            <property name="hibernate.c3p0.idle_test_period" value="2000" />
         </properties>
-        -->
     </persistence-unit>
 </persistence>
+

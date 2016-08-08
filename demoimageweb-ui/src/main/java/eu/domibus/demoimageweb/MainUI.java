@@ -28,10 +28,17 @@ import java.util.List;
 import java.util.ArrayList;
 
 import com.vaadin.server.ThemeResource;
+import eu.domibus.common.dao.MessageLogDao;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
 
+import eu.domibus.common.model.logging.MessageLogEntry;
+
+import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.IndexedContainer;
 
 /**
  * This UI is the application entry point. A UI may either represent a browser window
@@ -53,6 +60,9 @@ public class MainUI extends UI {
     private  final String AccesspointC3URL= "http://localhost:8081/domibus/home/messagelog";
     //public final String homeUrl="https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Access+Point+software";
     private  final String homeUrl="http://ec.europa.eu/index_en.htm";
+
+    private static final Log LOG = LogFactory.getLog(MainUI.class);
+
 
 
 
@@ -141,12 +151,15 @@ public class MainUI extends UI {
         VerticalLayout AccessPointC2Tab = new VerticalLayout();
         AccessPointC2Tab.setSizeFull();
         AccessPointC2Tab.setIcon(new ThemeResource("img/AccessPointC2.JPG"));
-        topTabsheet.addTab(AccessPointC2Tab);
+
         AccessPointC2Tab.setHeight(DimensionPool.pageHeight);
+        setAccessPointC2(AccessPointC2Tab);
+
+        topTabsheet.addTab(AccessPointC2Tab);
 
 
 
-
+/*
         BrowserFrame AccessPointC2TabBrowser = new BrowserFrame();
         AccessPointC2TabBrowser.setSource(new ExternalResource(AccesspointC2URL));
         AccessPointC2TabBrowser.setAlternateText("browser");
@@ -155,9 +168,12 @@ public class MainUI extends UI {
         AccessPointC2TabBrowser.setDescription("some description");
         AccessPointC2TabBrowser.setSizeFull();
         AccessPointC2TabBrowser.setHeight(DimensionPool.pageHeight);
+        */
 
 
-        AccessPointC2Tab.addComponent(AccessPointC2TabBrowser);
+
+
+        //AccessPointC2Tab.addComponent(messageLogVerticalLayout);
 
         BrowserWindowOpener popupOpener = new BrowserWindowOpener(MyPopupUI.class);
 
@@ -206,6 +222,32 @@ public class MainUI extends UI {
     public static class MyUIServlet extends VaadinServlet {
     }
 
+
+    public void setAccessPointC2(VerticalLayout aVerticalLayout) {
+
+
+        List<MessageLogEntry> messageLogEntryList= new MessageLogDao().findAll();
+
+        VerticalLayout messageLogVerticalLayout = new VerticalLayout();
+
+
+        Table table = new Table();
+
+        BeanItemContainer<MessageLogEntry> messageLogEntryBeanItemContainer = new BeanItemContainer<MessageLogEntry>(MessageLogEntry.class);
+        for (MessageLogEntry s : messageLogEntryList) {
+            messageLogEntryBeanItemContainer.addItem(s);
+        }
+        table.setContainerDataSource(messageLogEntryBeanItemContainer);
+
+        table.setWidth("100%");
+
+        messageLogVerticalLayout.addComponent(table);
+
+        aVerticalLayout.addComponent(messageLogVerticalLayout);
+
+    }
+
+
     public void setBackendTabC1(VerticalLayout aVerticalLayout) {
         System.out.println("setBackendTabC1 ");
 
@@ -221,6 +263,11 @@ public class MainUI extends UI {
         topC1BackendText.addComponent(new Label(StringPool.C1BackendIntroLabel));
 
         aVerticalLayout.addComponent(topC1BackendText);
+
+
+
+
+
         aVerticalLayout.setComponentAlignment(topC1BackendText, Alignment.TOP_RIGHT);
 
         HorizontalLayout messagePropertiesValue = new HorizontalLayout();
