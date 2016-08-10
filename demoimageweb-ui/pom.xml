@@ -13,6 +13,9 @@
 	<properties>
 		<jetty.maven.plugin>9.3.11</jetty.maven.plugin>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <version.vaadin-plugin>1.0.2</version.vaadin-plugin>
+        <slf4j.version>1.7.21</slf4j.version>
+        <logback.version>1.1.7</logback.version>
 	</properties>
 
 	<repositories>
@@ -121,11 +124,6 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>com.vaadin</groupId>
-			<artifactId>vaadin-themes</artifactId>
-		</dependency>
-
         <!-- domibus dependencies -->
 
         <dependency>
@@ -134,12 +132,6 @@
             <version>2.6</version>
         </dependency>
 
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
-        </dependency>
 
         <dependency>
             <groupId>commons-codec</groupId>
@@ -159,7 +151,34 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>5.1.34</version>
         </dependency>
-        <!--
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+            <version>${logback.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.vaadin.addons</groupId>
+			<artifactId>filteringtable</artifactId>
+			<version>0.9.15.v7</version>
+		</dependency>
+
+
+		<!--
 
         <dependency>
             <groupId>eu.domibus</groupId>
@@ -180,6 +199,21 @@
             <filtering>true</filtering>
         </resource>
         </resources>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.liferay.maven.plugins</groupId>
+                    <artifactId>liferay-maven-plugin</artifactId>
+                    <version>${version.liferay-plugin}</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>vaadin-maven-plugin</artifactId>
+                    <version>${version.vaadin-plugin}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
 		<plugins>
 
 			<plugin>
@@ -206,13 +240,7 @@
 				<configuration>
 					<scanIntervalSeconds>5</scanIntervalSeconds>
 					<webXml>${basedir}/src/jetty/web.xml</webXml>
-
 					<contextPath>/</contextPath>
-					<systemProperties>
-						<systemProperty>
-							<name>dgarne.resourcedir</name>
-						</systemProperty>
-					</systemProperties>
 				</configuration>
 			</plugin>
 

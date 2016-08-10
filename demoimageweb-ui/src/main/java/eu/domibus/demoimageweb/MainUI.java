@@ -1,9 +1,5 @@
 package eu.domibus.demoimageweb;
 
-import javax.servlet.annotation.WebServlet;
-import javax.xml.namespace.QName;
-import javax.xml.ws.Service;
-
 import backend.ecodex.org._1_1.BackendInterface;
 import backend.ecodex.org._1_1.PayloadType;
 import backend.ecodex.org._1_1.SendRequest;
@@ -12,33 +8,32 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.annotations.Viewport;
 import com.vaadin.annotations.Widgetset;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinServlet;
+import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.server.*;
 import com.vaadin.ui.*;
-import com.vaadin.server.ExternalResource;
-
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.server.BrowserWindowOpener;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
-import java.util.ArrayList;
-
-import com.vaadin.server.ThemeResource;
+import com.vaadin.ui.CustomTable.RowHeaderMode;
 import eu.domibus.common.dao.MessageLogDao;
+import eu.domibus.common.model.logging.MessageLogEntry;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
+import org.tepi.filtertable.paged.PagedFilterControlConfig;
+import org.tepi.filtertable.paged.PagedFilterTable;
 
-import eu.domibus.common.model.logging.MessageLogEntry;
+import javax.servlet.annotation.WebServlet;
+import javax.xml.namespace.QName;
+import javax.xml.ws.Service;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.IndexedContainer;
 
 /**
  * This UI is the application entry point. A UI may either represent a browser window
@@ -54,16 +49,14 @@ public class MainUI extends UI {
 
     private final String uploadedFileStr = "C:\\java\\workspaces\\demo-image\\demoimageweb\\src\\main\\resources\\payloads\\140.txt";
 
-    private  final String SenderWSDL= "http://localhost:8079/domibus/services/backend?wsdl";
-    private  final String RecipientWSDL= "http://localhost:8079/domibus/services/backend?wsdl";
-    private  final String AccesspointC2URL = "http://localhost:8079/domibus/home/messagelog";
-    private  final String AccesspointC3URL= "http://localhost:8081/domibus/home/messagelog";
+    private final String SenderWSDL = "http://localhost:8079/domibus/services/backend?wsdl";
+    private final String RecipientWSDL = "http://localhost:8079/domibus/services/backend?wsdl";
+    private final String AccesspointC2URL = "http://localhost:8079/domibus/home/messagelog";
+    private final String AccesspointC3URL = "http://localhost:8081/domibus/home/messagelog";
     //public final String homeUrl="https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Access+Point+software";
-    private  final String homeUrl="http://ec.europa.eu/index_en.htm";
+    private final String homeUrl = "http://ec.europa.eu/index_en.htm";
 
     private static final Log LOG = LogFactory.getLog(MainUI.class);
-
-
 
 
     enum FromPartyID {
@@ -125,7 +118,6 @@ public class MainUI extends UI {
         homeTabsheet.addComponent(ContactTab);
 
 
-
         ConsolesTab.setMargin(true);
 
         TabSheet topTabsheet = new TabSheet();
@@ -146,7 +138,6 @@ public class MainUI extends UI {
         setBackendTabC1(BackendC1Tab);
 
 
-
         // Create the secondTab
         VerticalLayout AccessPointC2Tab = new VerticalLayout();
         AccessPointC2Tab.setSizeFull();
@@ -157,23 +148,6 @@ public class MainUI extends UI {
 
         topTabsheet.addTab(AccessPointC2Tab);
 
-
-
-/*
-        BrowserFrame AccessPointC2TabBrowser = new BrowserFrame();
-        AccessPointC2TabBrowser.setSource(new ExternalResource(AccesspointC2URL));
-        AccessPointC2TabBrowser.setAlternateText("browser");
-        AccessPointC2TabBrowser.setCaptionAsHtml(true);
-        AccessPointC2TabBrowser.setImmediate(true);
-        AccessPointC2TabBrowser.setDescription("some description");
-        AccessPointC2TabBrowser.setSizeFull();
-        AccessPointC2TabBrowser.setHeight(DimensionPool.pageHeight);
-        */
-
-
-
-
-        //AccessPointC2Tab.addComponent(messageLogVerticalLayout);
 
         BrowserWindowOpener popupOpener = new BrowserWindowOpener(MyPopupUI.class);
 
@@ -226,30 +200,51 @@ public class MainUI extends UI {
     public void setAccessPointC2(VerticalLayout aVerticalLayout) {
 
 
-        List<MessageLogEntry> messageLogEntryList= new MessageLogDao().findAll();
+        List<MessageLogEntry> messageLogEntryList = new MessageLogDao().findAll();
 
         VerticalLayout messageLogVerticalLayout = new VerticalLayout();
 
-
-        Table table = new Table();
-
         BeanItemContainer<MessageLogEntry> messageLogEntryBeanItemContainer = new BeanItemContainer<MessageLogEntry>(MessageLogEntry.class);
-        for (MessageLogEntry s : messageLogEntryList) {
-            messageLogEntryBeanItemContainer.addItem(s);
+
+
+        PagedFilterTable<IndexedContainer> filterTable = new PagedFilterTable<IndexedContainer>();
+        for (MessageLogEntry messageLogEntry : messageLogEntryList) {
+            messageLogEntryBeanItemContainer.addItem(messageLogEntry);
         }
-        table.setContainerDataSource(messageLogEntryBeanItemContainer);
 
-        table.setWidth("100%");
+        filterTable.setSizeFull();
+        filterTable.setFilterBarVisible(true);
 
-        messageLogVerticalLayout.addComponent(table);
+        filterTable.setSelectable(true);
+        filterTable.setImmediate(true);
+        filterTable.setMultiSelect(true);
+
+        filterTable.setRowHeaderMode(RowHeaderMode.INDEX);
+
+        filterTable.setColumnCollapsingAllowed(true);
+
+        filterTable.setColumnReorderingAllowed(true);
+
+
+        filterTable.setContainerDataSource(messageLogEntryBeanItemContainer);
+
+        filterTable.setPageLength(10);
+
+
+        filterTable.setVisibleColumns(new String[]{"messageId", "messageStatus", "notificationStatus", "mshRole", "messageType", "deleted", "received", "sendAttempts", "sendAttemptsMax", "nextAttempt"});
+        filterTable.setColumnHeaders(new String[]{"Message ID", "Message Satus", "Notification Status", "MshRole", "Message Type", "Deleted", "Received", "Failed Send Attemps", "Send Attemps Max", "Next Attempt"});
+
+        messageLogVerticalLayout.addComponent(filterTable);
+        messageLogVerticalLayout.addComponent(filterTable.createControls(new PagedFilterControlConfig()));
 
         aVerticalLayout.addComponent(messageLogVerticalLayout);
+
 
     }
 
 
     public void setBackendTabC1(VerticalLayout aVerticalLayout) {
-        System.out.println("setBackendTabC1 ");
+        LOG.debug("setBackendTabC1 ");
 
         aVerticalLayout.setSizeFull();
 
@@ -263,9 +258,6 @@ public class MainUI extends UI {
         topC1BackendText.addComponent(new Label(StringPool.C1BackendIntroLabel));
 
         aVerticalLayout.addComponent(topC1BackendText);
-
-
-
 
 
         aVerticalLayout.setComponentAlignment(topC1BackendText, Alignment.TOP_RIGHT);
@@ -327,12 +319,9 @@ public class MainUI extends UI {
 
         // Prepare the itemList
         List<PartyID> PartyIDList = new ArrayList<PartyID>();
-        PartyIDList.add( new PartyID(StringPool.ceftestparty1ID01));
-        PartyIDList.add( new PartyID(StringPool.ceftestparty1ID02));
+        PartyIDList.add(new PartyID(StringPool.ceftestparty1ID01));
+        PartyIDList.add(new PartyID(StringPool.ceftestparty1ID02));
 
-        //BeanItemContainer<PartyID> objects = new BeanItemContainer(PartyID.class, PartyIDList);
-
-        //final ComboBox toPartyIDComboBox = new ComboBox("PartyID", objects);
         final ComboBox toPartyIDComboBox = new ComboBox();
         toPartyIDComboBox.setInvalidAllowed(false);
         toPartyIDComboBox.setNullSelectionAllowed(false);
@@ -340,11 +329,6 @@ public class MainUI extends UI {
         toPartyIDComboBox.addItem(toPartyID.ceftestparty1ID01);
         toPartyIDComboBox.addItem(toPartyID.ceftestparty1ID02);
 
-        /*
-        toPartyIDComboBox.addItem(new PartyID(StringPool.ceftestparty1ID01));
-
-        toPartyIDComboBox.addItem(new PartyID(StringPool.ceftestparty1ID01));
-         */
 
         toPartyIDComboBox.setValue(toPartyID.ceftestparty1ID01);
         aToPartyHorizontalLayout.addComponent(toPartyIDComboBox);
@@ -364,14 +348,13 @@ public class MainUI extends UI {
             public void buttonClick(ClickEvent event) {
                 sendMessageButton.setCaption("Send Message");
                 try {
-                    System.out.println("fromPartyIDComboBox :" + fromPartyIDComboBox.getValue().toString());
-                    System.out.println("toPartyIDComboBox :" + toPartyIDComboBox.getValue().toString());
+                    LOG.info("fromPartyIDComboBox :" + fromPartyIDComboBox.getValue().toString());
                     response = sendMessage2wsdl(uploadedFileStr, SenderWSDL, fromPartyIDComboBox.getValue().toString(), toPartyIDComboBox.getValue().toString());
                 } catch (Exception e) {
                     e.printStackTrace();
                     messageSentID.setCaption(" Message has not yet sent");
                 }
-                System.out.println("main" + " - messageId: " + response.getMessageID().get(0));
+                LOG.info("main" + " - messageId: " + response.getMessageID().get(0));
                 messageSentID.setCaption(response.getMessageID().get(0));
             }
         });
@@ -388,10 +371,9 @@ public class MainUI extends UI {
         aVerticalLayout.addComponent(aMessageAndPmodeHorizontalLayout);
         aVerticalLayout.setComponentAlignment(aMessageAndPmodeHorizontalLayout, Alignment.TOP_RIGHT);
 
-        Label  resultLabel  =new Label(StringPool.ResultLabel);
+        Label resultLabel = new Label(StringPool.ResultLabel);
         aVerticalLayout.addComponent(resultLabel);
-        aVerticalLayout.setComponentAlignment(resultLabel,Alignment.TOP_RIGHT);
-
+        aVerticalLayout.setComponentAlignment(resultLabel, Alignment.TOP_RIGHT);
 
 
         aResultHorizontalLayout.addComponent(messageSentLabel);
@@ -416,7 +398,7 @@ public class MainUI extends UI {
     }
 
     public void setBackendTabC4(VerticalLayout aVerticalLayout) {
-        System.out.println("setBackendTabC4 ");
+        LOG.info("setBackendTabC4 ");
 
         final TextField textField = new TextField();
         final Label messageSentLabel = new Label("Message ID  :");
@@ -453,7 +435,6 @@ public class MainUI extends UI {
     }
 
 
-
     public static SendResponse sendMessage2wsdl(String filename, String wsdlStr, String senderStr, String recepientStr) throws Exception {
         URL wsdlURL = new URL(wsdlStr);
         QName SERVICE_NAME = new QName("http://org.ecodex.backend/1_1/", "BackendService_1_1");
@@ -464,11 +445,9 @@ public class MainUI extends UI {
         SendRequest sendRequest = createSendRequest(payloadHref, filename);
         Messaging ebMSHeaderInfo = createMessage_sender_2_recipient(payloadHref, null, senderStr, recepientStr);
 
-        //client.downloadMessage(10);
         return client.sendMessage(sendRequest, ebMSHeaderInfo);
 
     }
-
 
 
     protected static SendRequest createSendRequest(String payloadHref, String filename) {
@@ -542,7 +521,6 @@ public class MainUI extends UI {
         aProperty.setType(type);
         return aProperty;
     }
-
 
 
 }
