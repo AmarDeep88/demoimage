@@ -10,7 +10,6 @@ import com.vaadin.annotations.Viewport;
 import com.vaadin.annotations.Widgetset;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.IndexedContainer;
-import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.data.util.PropertysetItem;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
 import com.vaadin.data.util.sqlcontainer.connection.SimpleJDBCConnectionPool;
@@ -278,61 +277,50 @@ public class MainUI extends UI {
         SQLContainer container = null;
         ResultSet results;
 
-        final BeanItemContainer<SentMessageBean> beans = new BeanItemContainer<SentMessageBean>(SentMessageBean.class);
+        final BeanItemContainer<SentMessageBean> beanItemContainer = new BeanItemContainer<SentMessageBean>(SentMessageBean.class);
         ArrayList<SentMessageBean> beanlist = new ArrayList<SentMessageBean>();
+
+        PagedFilterTable<IndexedContainer> filterTable = new PagedFilterTable<IndexedContainer>();
+
+
 
 
         try {
             conn = pool.reserveConnection();
             statement = conn.createStatement();
-
             results = statement.executeQuery(StringPool.Query4C1Str);
-            //results  = statement.executeQuery(StringPool.QuerytbMessageLogStr);
             int i = 0;
 
             while (results.next()) {
                 PropertysetItem item = new PropertysetItem();
-
-//
-//                item.addItemProperty(StringPool.ORIGINAL_SENDER, new ObjectProperty<String>(results.getString(1), String.class));
-//                item.addItemProperty(StringPool.FINAL_RECIPIENT, new ObjectProperty<String>(results.getString(2), String.class));
-//                item.addItemProperty(StringPool.FROM, new ObjectProperty<String>(results.getString(3), String.class));
-//                item.addItemProperty(StringPool.TO, new ObjectProperty<String>(results.getString(4), String.class));
-//                item.addItemProperty(StringPool.STATUS, new ObjectProperty<MessageStatus>(MessageStatus.fromValue(results.getString(5)), MessageStatus.class));
-//                item.addItemProperty(StringPool.MESSAGE_ID, new ObjectProperty<String>(results.getString(6), String.class));
-
-
-                //fromOriginalSender2FinalRecipientTable.addValueChangeListener(valueChangeListenrTable);
-                //fromOriginalSender2FinalRecipientTable.addItem(item);
-
-                LOG.info("item: " + item.toString());
-                //SentMessageBean aSentMessageBean = new SentMessageBean(" a random messageId"+ i++);
                 SentMessageBean aSentMessageBean = new SentMessageBean(results.getString(1), results.getString(2), results.getString(3), results.getString(4), results.getString(5), results.getString(6));
-                LOG.info("aSentMessageBean: " + aSentMessageBean.toString());
                 beanlist.add(aSentMessageBean);
             }
 
-            beans.addAll(beanlist);
+            beanItemContainer.addAll(beanlist);
+            filterTable.setSizeFull();
+            filterTable.setFilterBarVisible(true);
+
+            filterTable.setSelectable(true);
+            filterTable.setImmediate(true);
+            filterTable.setMultiSelect(true);
+
+            filterTable.setRowHeaderMode(RowHeaderMode.INDEX);
+
+            filterTable.setColumnCollapsingAllowed(true);
+
+            filterTable.setColumnReorderingAllowed(true);
 
 
-            final Table fromOriginalSender2FinalRecipientTable = new Table("Beans of All Sorts", beans);
-            fromOriginalSender2FinalRecipientTable.setImmediate(true);
-            fromOriginalSender2FinalRecipientTable.setSizeFull();
-            fromOriginalSender2FinalRecipientTable.setVisibleColumns(new Object[]{"originalSender", "finalRecipient", "fromParty", "toParty", "messageStatus", "messageId"});
+            filterTable.setContainerDataSource(beanItemContainer);
 
+            filterTable.setPageLength(10);
+            filterTable.setVisibleColumns(new String[]{"originalSender", "finalRecipient", "fromParty", "toParty", "messageStatus", "messageId"});
+            filterTable.setColumnHeaders(new String[]{"Original Sender", "Final Recipient", "From Party ID", "To Party ID", "Message Status", "Message Id"});
 
-            if (fromOriginalSender2FinalRecipientTable.size() > 0) {
-                LOG.info("fromOriginalSender2FinalRecipientTable >0 , size:  " + fromOriginalSender2FinalRecipientTable.size());
-                fromOriginalSender2FinalRecipientTable.setPageLength(fromOriginalSender2FinalRecipientTable.size());
+            messageLogVerticalLayout.addComponent(filterTable);
+            messageLogVerticalLayout.addComponent(filterTable.createControls(new PagedFilterControlConfig()));
 
-                LOG.info("going to add table ");
-                messageLogVerticalLayout.addComponent(fromOriginalSender2FinalRecipientTable);
-
-            } else {
-
-                LOG.info("fromOriginalSender2FinalRecipientTable size:  " + fromOriginalSender2FinalRecipientTable.size());
-
-            }
 
             LOG.info("table construction is finnished ");
 
@@ -352,97 +340,16 @@ public class MainUI extends UI {
         LOG.info("setBackendTabC1");
         setMessagesSentC1(aVerticalLayout);
 
+        LOG.info("going to add sendMessagePanel");
+        sendMessagePanel(aVerticalLayout);
+
 
     }
 
 
-    public void anotherFunction2beRemoved(VerticalLayout aVerticalLayout) {
+    public void sendMessagePanel(VerticalLayout aVerticalLayout) {
 
-        LOG.info("setBackendTabC1 with bean ");
-
-
-        VerticalLayout messageLogVerticalLayout = new VerticalLayout();
-
-        aVerticalLayout.addComponent(messageLogVerticalLayout);
-
-
-        Connection conn = null;
-        Statement statement = null;
-        SQLContainer container = null;
-        ResultSet results;
-
-        try {
-            conn = pool.reserveConnection();
-            statement = conn.createStatement();
-
-            //results  = statement.executeQuery(StringPool.Query4C1Str);
-            results = statement.executeQuery(StringPool.QuerytbMessageLogStr);
-
-            ArrayList<SentMessageBean> beanlist = new ArrayList<SentMessageBean>();
-            final BeanItemContainer<SentMessageBean> beanItemContainer = new BeanItemContainer<SentMessageBean>(SentMessageBean.class);
-
-
-            while (results.next()) {
-                PropertysetItem item = new PropertysetItem();
-                item.addItemProperty(StringPool.MESSAGE_ID, new ObjectProperty<String>(results.getString(1), String.class));
-                SentMessageBean aSentMessageBean = new SentMessageBean();
-
-                /*
-                item.addItemProperty(StringPool.ORIGINAL_SENDER, new ObjectProperty<String>(results.getString(1), String.class));
-                item.addItemProperty(StringPool.FINAL_RECIPIENT, new ObjectProperty<String>(results.getString(2), String.class));
-                item.addItemProperty(StringPool.FROM, new ObjectProperty<String>(results.getString(3), String.class));
-                item.addItemProperty(StringPool.TO, new ObjectProperty<String>(results.getString(4), String.class));
-                item.addItemProperty(StringPool.STATUS, new ObjectProperty<MessageStatus>(MessageStatus.fromValue(results.getString(5)), MessageStatus.class));
-                item.addItemProperty(StringPool.MESSAGE_ID, new ObjectProperty<String>(results.getString(6), String.class));
-                */
-
-                //fromOriginalSender2FinalRecipientTable.addValueChangeListener(valueChangeListenrTable);
-                //fromOriginalSender2FinalRecipientTable.addItem(item);
-
-
-                LOG.info("item: " + item.toString());
-                beanlist.add(aSentMessageBean);
-                LOG.info("aSentMessageBean: " + aSentMessageBean.toString());
-
-
-            }
-
-            LOG.info("beanlist size: " + beanlist.size());
-
-            beanItemContainer.addAll(beanlist);
-            final Table fromOriginalSender2FinalRecipientTable = new Table("Beans of All Sorts", beanItemContainer);
-
-            fromOriginalSender2FinalRecipientTable.setImmediate(true);
-            fromOriginalSender2FinalRecipientTable.setSizeFull();
-
-            //fromOriginalSender2FinalRecipientTable.setPageLength(beanItemContainer.size());
-            //fromOriginalSender2FinalRecipientTable.setVisibleColumns(new Object[]{"messageId"});
-
-
-            if (fromOriginalSender2FinalRecipientTable.size() > 0) {
-                LOG.info("fromOriginalSender2FinalRecipientTable >0 , size:  " + fromOriginalSender2FinalRecipientTable.size());
-                fromOriginalSender2FinalRecipientTable.setPageLength(fromOriginalSender2FinalRecipientTable.size());
-                aVerticalLayout.addComponent(fromOriginalSender2FinalRecipientTable);
-
-            } else {
-
-                LOG.info("fromOriginalSender2FinalRecipientTable size:  " + fromOriginalSender2FinalRecipientTable.size());
-
-            }
-
-            LOG.info("table construction is finnished ");
-
-        } catch (SQLException e) {
-            LOG.error("SQLException error " + e.getMessage());
-        } catch (UnsupportedOperationException e) {
-            LOG.error("UnsupportedOperationException error " + e.getMessage());
-
-        } catch (Exception e) {
-            LOG.error("db error " + e.getMessage());
-        }
-
-
-/*
+        LOG.info("sendMessagePanel ");
 
         VerticalLayout topC1BackendText = new VerticalLayout();
         topC1BackendText.setMargin(true);
@@ -588,9 +495,6 @@ public class MainUI extends UI {
 
         aVerticalLayout.addComponent(anErrorHorizontalLayout);
         aVerticalLayout.setComponentAlignment(anErrorHorizontalLayout, Alignment.TOP_RIGHT);
-*/
-
-
     }
 
     public void setBackendTabC4(VerticalLayout aVerticalLayout) {
