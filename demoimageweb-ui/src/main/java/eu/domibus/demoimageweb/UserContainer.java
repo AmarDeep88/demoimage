@@ -5,9 +5,8 @@ package eu.domibus.demoimageweb;
  */
 public class UserContainer {
 
-    //public static final Object[] NATURAL_COL_ORDER = new Object[] {new Object[] { "endPoint", "mpc", "messageType", "messageId", "mshRole", "deleted", "received","notificationStatus" }};
-    public static final Object[] NATURAL_COL_ORDER = new Object[] {new Object[] {"entityId","received" }};
 
-    public static final Object[] COL_HEADERS_ENGLISH = new Object[] {new Object[] { "endPoint", "mpc", "messageType", "messageId",
-            "mshRole", "deleted", "received","notificationStatus" }};
+    public static final Object[] NATURAL_COL_ORDER = new Object[] {new String[] { "messageId","endpoint", "mshRole",  "received","notificationStatus" }};
+
+
 }

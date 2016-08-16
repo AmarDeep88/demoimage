@@ -25,4 +25,49 @@ public class StringPool {
     public static final String MessagePropertieslabel  ="Message Properties";
     public static final String Valuelabel  = "Value";
     public static final String ResultLabel  = "Result";
+
+    public static final String ORIGINAL_SENDER ="ORIGINAL SENDER";
+    public static final String FINAL_RECIPIENT ="FINAL RECIPIENT";
+    public static final String FROM            ="FROM PARTY";
+    public static final String TO            =  "TO PARTY";
+    public static final String STATUS            =  "STATUS";
+    public static final String MESSAGE_ID            =  "MESSAGE ID";
+
+    public static final String CONTENT            =  "CONTENT";
+
+    public static final String Query4C1Str ="SELECT  " +
+    "tbPropertyS.value           AS \"ORIGINAL SENDER\","+
+    "tbPropertyD.value           AS \"FINAL RECIPIENT\","+
+    "tbPartyIdFrom.VALUE         AS \"FROM PARTY\","+
+    "tbPartyIdTo.VALUE           AS \"TO PARTY\","+
+    "tbMessageLog.MESSAGE_STATUS AS \"STATUS\","+
+    "tbMessageInfo.MESSAGE_ID    AS \"MESSAGE ID\""+
+
+
+    " FROM "+
+    "TB_PROPERTY tbPropertyS,"+
+    "TB_PROPERTY tbPropertyD,"+
+    "TB_USER_MESSAGE tbUserMessage,"+
+    "TB_MESSAGE_INFO tbMessageInfo,"+
+    "TB_MESSAGE_LOG tbMessageLog,"+
+    "tb_party_id tbPartyIdFrom,"+
+    "tb_party_id tbPartyIdTo,"+
+    "TB_PART_INFO tbPartInfo "+
+
+    " WHERE "+
+    "tbPartyIdTo.TO_ID                  = tbUserMessage.ID_PK "+
+    "AND tbPartyIdFrom.FROM_ID            = tbUserMessage.ID_PK "+
+    "AND tbPartyIdFrom.FROM_ID            = tbPropertyS.MESSAGEPROPERTIES_ID "+
+    "AND tbPropertyD.MESSAGEPROPERTIES_ID = tbUserMessage.ID_PK "+
+    "AND tbUserMessage.messageinfo_id_pk  = tbMessageInfo.ID_PK "+
+    "AND tbMessageLog.MESSAGE_ID          = tbMessageInfo.MESSAGE_ID "+
+    "AND tbPartInfo.PAYLOADINFO_ID        = tbUserMessage.ID_PK  "+
+    "AND tbPropertyS.name                 = 'originalSender'  "+
+    "AND tbPropertyD.name                 = 'finalRecipient'  " ;
+
+        //"tbPartInfo.BINARY_DATA      AS \"CONTENT\" "+
+
+    public static final String QuerytbMessageLogStr ="SELECT  tbMessageLog.MESSAGE_ID FROM   TB_MESSAGE_LOG tbMessageLog";
+
+
 }
