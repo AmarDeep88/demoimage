@@ -22,7 +22,6 @@ import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.model.logging.MessageLogEntry;
 import eu.domibus.demoimageweb.model.SentMessageBean;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.*;
@@ -32,9 +31,6 @@ import org.tepi.filtertable.paged.PagedFilterTable;
 import javax.servlet.annotation.WebServlet;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -55,7 +51,7 @@ import java.util.List;
 @Widgetset("eu.domibus.demoimageweb.MyAppWidgetset")
 public class MainUI extends UI {
 
-    private final String uploadedFileStr = "C:\\java\\workspaces\\demo-image\\demoimageweb\\src\\main\\resources\\payloads\\140.txt";
+    private final String payloadStr = "C:\\java\\workspaces\\demo-image\\demoimageweb\\src\\main\\resources\\payloads\\140.txt";
 
     private final String SenderWSDL = "http://localhost:8079/domibus/services/backend?wsdl";
     private final String RecipientWSDL = "http://localhost:8079/domibus/services/backend?wsdl";
@@ -283,8 +279,6 @@ public class MainUI extends UI {
         PagedFilterTable<IndexedContainer> filterTable = new PagedFilterTable<IndexedContainer>();
 
 
-
-
         try {
             conn = pool.reserveConnection();
             statement = conn.createStatement();
@@ -338,12 +332,11 @@ public class MainUI extends UI {
 
     public void setBackendTabC1(VerticalLayout aVerticalLayout) {
         LOG.info("setBackendTabC1");
-        setMessagesSentC1(aVerticalLayout);
 
         LOG.info("going to add sendMessagePanel");
         sendMessagePanel(aVerticalLayout);
 
-
+        setMessagesSentC1(aVerticalLayout);
     }
 
 
@@ -438,6 +431,22 @@ public class MainUI extends UI {
         aVerticalLayout.setComponentAlignment(aToPartyHorizontalLayout, Alignment.TOP_RIGHT);
 
 
+        final Label MessagePayloadLabel= new Label(StringPool.MessagePayloadLabel);
+        aVerticalLayout.addComponent(MessagePayloadLabel);
+        aVerticalLayout.setComponentAlignment(MessagePayloadLabel, Alignment.TOP_LEFT);
+
+        final TextArea messagePayloadTextArea  = new TextArea();
+        messagePayloadTextArea.setValue("hello world");
+        messagePayloadTextArea.setRows(5);
+        messagePayloadTextArea.setColumns(20);
+
+        messagePayloadTextArea.setImmediate(true);
+        messagePayloadTextArea.setWordwrap(true);
+
+        aVerticalLayout.addComponent(messagePayloadTextArea);
+        aVerticalLayout.setComponentAlignment(messagePayloadTextArea, Alignment.TOP_RIGHT);
+
+
         final Button sendMessageButton = new Button(StringPool.SendMessageLabel);
 
         HorizontalLayout anErrorHorizontalLayout = new HorizontalLayout();
@@ -450,8 +459,8 @@ public class MainUI extends UI {
             public void buttonClick(ClickEvent event) {
                 sendMessageButton.setCaption("Send Message");
                 try {
-                    LOG.info("fromPartyIDComboBox :" + fromPartyIDComboBox.getValue().toString());
-                    response = sendMessage2wsdl(uploadedFileStr, SenderWSDL, fromPartyIDComboBox.getValue().toString(), toPartyIDComboBox.getValue().toString());
+                    LOG.info("fromPartyIDComboBox :" + fromPartyIDComboBox.getValue().toString() + toPartyIDComboBox.getValue()+", messagePayloadTextArea : " + messagePayloadTextArea.getValue());
+                    response = sendMessage2wsdl(messagePayloadTextArea.getValue(), SenderWSDL, fromPartyIDComboBox.getValue().toString(), toPartyIDComboBox.getValue().toString());
                 } catch (Exception e) {
                     e.printStackTrace();
                     messageSentID.setCaption(" Message has not yet sent");
@@ -516,7 +525,7 @@ public class MainUI extends UI {
             public void buttonClick(ClickEvent event) {
                 button.setCaption("Send");
                 try {
-                    response = sendMessage2wsdl(uploadedFileStr, RecipientWSDL, StringPool.C4PartyIDStr, StringPool.C1PartyIDStr);
+                    response = sendMessage2wsdl(payloadStr, RecipientWSDL, StringPool.C4PartyIDStr, StringPool.C1PartyIDStr);
                     System.out.println(" from C4PartyIDStr: " + StringPool.C4PartyIDStr + "  to  C1PartyIDStr:  " + StringPool.C1PartyIDStr);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -535,14 +544,15 @@ public class MainUI extends UI {
     }
 
 
-    public static SendResponse sendMessage2wsdl(String filename, String wsdlStr, String senderStr, String recepientStr) throws Exception {
+    public static SendResponse sendMessage2wsdl(String  payloadStr, String wsdlStr, String senderStr, String recepientStr) throws Exception {
         URL wsdlURL = new URL(wsdlStr);
         QName SERVICE_NAME = new QName("http://org.ecodex.backend/1_1/", "BackendService_1_1");
         Service service = Service.create(wsdlURL, SERVICE_NAME);
         BackendInterface client = service.getPort(BackendInterface.class);
         String payloadHref = "cid:message";
 
-        SendRequest sendRequest = createSendRequest(payloadHref, filename);
+        SendRequest sendRequest = createSendRequest(payloadHref,  payloadStr);
+
         Messaging ebMSHeaderInfo = createMessage_sender_2_recipient(payloadHref, null, senderStr, recepientStr);
 
         return client.sendMessage(sendRequest, ebMSHeaderInfo);
@@ -550,17 +560,19 @@ public class MainUI extends UI {
     }
 
 
-    protected static SendRequest createSendRequest(String payloadHref, String filename) {
+    protected static SendRequest createSendRequest(String payloadHref,  String payloadStr) {
         SendRequest sendRequest = new SendRequest();
         PayloadType payload = new PayloadType();
         payload.setPayloadId(payloadHref);
         payload.setContentType("text/xml");
-        byte[] payloadBytes = null;
+        byte[] payloadBytes = payloadStr.getBytes();
+
+      /*  byte[] payloadBytes = null;
         try {
             payloadBytes = IOUtils.toByteArray(new FileInputStream(new File(filename)));
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
         payload.setValue(Base64.decodeBase64(payloadBytes));
         sendRequest.getPayload().add(payload);
 

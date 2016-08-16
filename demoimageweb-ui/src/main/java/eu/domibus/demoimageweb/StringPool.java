@@ -26,6 +26,9 @@ public class StringPool {
     public static final String Valuelabel  = "Value";
     public static final String ResultLabel  = "Result";
 
+    public static final String MessagePayloadLabel  = "Message Payload";
+    public static final String MessagePayloadTextBox   = "MessagePayloadTextBox";
+
     public static final String ORIGINAL_SENDER ="ORIGINAL SENDER";
     public static final String FINAL_RECIPIENT ="FINAL RECIPIENT";
     public static final String FROM            ="FROM PARTY";

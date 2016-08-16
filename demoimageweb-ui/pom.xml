@@ -23,6 +23,10 @@
 			<id>vaadin-addons</id>
 			<url>http://maven.vaadin.com/vaadin-addons</url>
 		</repository>
+        <repository>
+            <id>mvnrepository.com</id>
+            <url>https://mvnrepository.com</url>
+        </repository>
 		<repository>
 			<id>vaadin-snapshots</id>
 			<url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
@@ -67,7 +71,7 @@
 
 
 
-        <!-- Bean validation implementation -->
+        <!-- SentMessageBean validation implementation -->
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
@@ -170,7 +174,13 @@
             <version>${logback.version}</version>
 			<scope>compile</scope>
 		</dependency>
-
+        <!--
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-c3p0</artifactId>
+            <version>5.2.1.Final</version>
+        </dependency>
+        -->
 		<dependency>
 			<groupId>org.vaadin.addons</groupId>
 			<artifactId>filteringtable</artifactId>
@@ -255,6 +265,17 @@
 					</httpConnector>
 					<scanIntervalSeconds>2</scanIntervalSeconds>
 					<stopPort>8182</stopPort>
+					<systemProperties>
+						<systemProperty>
+							<name>org.eclipse.jetty.annotations.maxWait</name>
+							<value>120</value>
+						</systemProperty>
+					</systemProperties>
+					<jvmArgs>
+						-Xmx1024m
+						-XX:MaxPermSize=512m
+						-Ddb.path=${project.build.directory}/db
+					</jvmArgs>
 				</configuration>
 			</plugin>
 
