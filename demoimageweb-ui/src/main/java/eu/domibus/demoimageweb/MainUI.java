@@ -16,11 +16,11 @@ import com.vaadin.data.util.sqlcontainer.connection.SimpleJDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.query.QueryDelegate;
 import com.vaadin.server.*;
 import com.vaadin.ui.*;
-import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CustomTable.RowHeaderMode;
 import eu.domibus.common.dao.MessageLogDao;
 import eu.domibus.common.model.logging.MessageLogEntry;
 import eu.domibus.demoimageweb.model.SentMessageBean;
+import eu.domibus.demoimageweb.util.FileLocationIds;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,6 +38,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
+import eu.domibus.demoimageweb.util.CustomLayoutBuilder;
 
 /**
  * This UI is the application entry point. A UI may either represent a browser window
@@ -60,8 +62,22 @@ public class MainUI extends UI {
     //public final String homeUrl="https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Access+Point+software";
     private final String homeUrl = "http://ec.europa.eu/index_en.htm";
 
-    private static final Log LOG = LogFactory.getLog(MainUI.class);
+    private static final Log logger = LogFactory.getLog(MainUI.class);
 
+    private VerticalLayout mainLayout = new VerticalLayout();
+    private CustomLayout dashboardCustomLayout;
+    private TabSheet mainNavigationTabSheet = new TabSheet();
+    TabSheet FourCornerModelTabSheet;
+
+
+    private CustomLayout homeTabCustomLayout;
+    private CustomLayout secondCustomLayout;
+    private CustomLayout thirdCustomLayout;
+
+    private CustomLayout backendC1TabCustomLayout;
+    private CustomLayout accessPointC2TabCustomLayout;
+    private CustomLayout accessPointC3TabCustomLayout;
+    private CustomLayout backendC4TabCustomLayout;
     private SimpleJDBCConnectionPool pool;
 
 
@@ -79,31 +95,157 @@ public class MainUI extends UI {
     @Override
     protected void init(VaadinRequest vaadinRequest) {
 
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initialisation  of home page.");
+        }
+
         try {
             pool = new SimpleJDBCConnectionPool(
                     "com.mysql.jdbc.Driver",
                     "jdbc:mysql://localhost:3306/domibus_blue", "domibus_blue", "Domibus.123", 2, 5);
 
         } catch (SQLException e) {
-            LOG.error(" Cannot connect to DB" + e.getMessage());
+            logger.error(" Cannot connect to DB" + e.getMessage());
         }
 
-        final VerticalLayout layout = new VerticalLayout();
-
-        // vertical home tabsheet on top
-        TabSheet homeTabsheet = new TabSheet();
-        homeTabsheet.setHeight("100");
-        homeTabsheet.setSizeFull();
-        layout.addComponent(homeTabsheet);
+        initCustomLayouts();
 
 
-        VerticalLayout HomeTab = new VerticalLayout();
-        HomeTab.setMargin(true);
-        HomeTab.setSpacing(true);
-        HomeTab.setCaption("Home");
-        HomeTab.setSizeFull();
-        HomeTab.setHeight(DimensionPool.pageHeight);
+        mainLayout.addComponent(dashboardCustomLayout);
 
+        dashboardCustomLayout.addComponent(new VerticalLayout(), "left");
+        dashboardCustomLayout.addComponent(mainNavigationTabSheet, CustomLayoutPool.homeTabSheet_Loc);
+        dashboardCustomLayout.addComponent(new VerticalLayout(), "right");
+
+        mainNavigationTabSheet.addComponent(homeTabCustomLayout);
+        mainNavigationTabSheet.setSizeUndefined();
+
+        mainNavigationTabSheet.addTab(homeTabCustomLayout, StringPool.Home_Caption);
+        mainNavigationTabSheet.addTab(secondCustomLayout, StringPool.Consoles_Caption);
+        mainNavigationTabSheet.addTab(thirdCustomLayout, StringPool.Contact_Caption);
+
+
+        buildHomeIntro();
+
+
+        mainNavigationTabSheet.addSelectedTabChangeListener(new TabSheet.SelectedTabChangeListener() {
+
+            public void selectedTabChange(TabSheet.SelectedTabChangeEvent selectedTabChangeEvent) {
+                TabSheet tabsheet = selectedTabChangeEvent.getTabSheet();
+                Layout selectedTab = (Layout) tabsheet.getSelectedTab();
+
+                String caption = tabsheet.getTab(selectedTab).getCaption();
+
+                if (caption.equalsIgnoreCase(StringPool.Home_Caption)) {
+                    buildHomeIntro();
+
+                } else if (caption.equalsIgnoreCase(StringPool.Consoles_Caption)) {
+                    buildConsolesTab();
+
+                } else if (caption.equalsIgnoreCase(StringPool.Consoles_Caption)) {
+                    buildContactPage();
+
+                }
+
+            }
+        });
+
+        setContent(mainLayout);
+    }
+
+
+    public void initCustomLayouts() {
+
+        dashboardCustomLayout = new CustomLayoutBuilder(FileLocationIds.HOME_PAGE, this.getClass()).instanciateLayout();
+
+        if (dashboardCustomLayout == null) {
+            logger.info("dashboardCustomLayout is null ");
+        } else {
+            logger.info("dashboardCustomLayout is not null ");
+        }
+
+        homeTabCustomLayout = new CustomLayoutBuilder(FileLocationIds.HOME_INTRO_PAGE, this.getClass()).instanciateLayout();
+
+        if (homeTabCustomLayout == null) {
+            logger.info("homeTabCustomLayout is null ");
+        } else {
+            logger.info("homeTabCustomLayout not  null ");
+        }
+
+        secondCustomLayout = new CustomLayoutBuilder(FileLocationIds.CONSOLES_PAGE, this.getClass()).instanciateLayout();
+        if (secondCustomLayout == null) {
+            logger.info("secondCustomLayout is null ");
+        } else {
+            logger.info("secondCustomLayout is not null ");
+        }
+
+        thirdCustomLayout = new CustomLayoutBuilder(FileLocationIds.CONTACT_PAGE, this.getClass()).instanciateLayout();
+
+        if (thirdCustomLayout == null) {
+            logger.info("thirdCustomLayout is null ");
+        } else {
+            logger.info("thirdCustomLayout is not null ");
+
+        }
+
+
+    }
+
+
+    public void initConsolesCustomLayouts() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("initCustomLayoutsConsoles ");
+        }
+
+        backendC1TabCustomLayout = new CustomLayoutBuilder(FileLocationIds.BACKENDC1, this.getClass()).instanciateLayout();
+
+
+        if (backendC1TabCustomLayout == null) {
+            logger.info("backendC1TabCustomLayout is null ");
+        } else {
+            backendC1TabCustomLayout.setIcon(new ThemeResource("img/BackendC1.JPG"));
+            logger.info("backendC1TabCustomLayout not  null ");
+        }
+
+        accessPointC2TabCustomLayout = new CustomLayoutBuilder(FileLocationIds.ACCESSPOINT2, this.getClass()).instanciateLayout();
+
+        if (accessPointC2TabCustomLayout == null) {
+            logger.info("accessPointC2TabCustomLayout is null ");
+
+        } else {
+            logger.info("accessPointC2TabCustomLayout not  null ");
+            accessPointC2TabCustomLayout.setIcon(new ThemeResource("img/AccessPointC2.JPG"));
+        }
+
+
+        accessPointC3TabCustomLayout = new CustomLayoutBuilder(FileLocationIds.ACCESSPOINT3, this.getClass()).instanciateLayout();
+
+        if (accessPointC2TabCustomLayout == null) {
+            logger.info("accessPointC3TabCustomLayout is null ");
+
+        } else {
+            logger.info("accessPointC2TabCustomLayout not  null ");
+            accessPointC3TabCustomLayout.setIcon(new ThemeResource("img/AccessPointC3.JPG"));
+        }
+
+        backendC4TabCustomLayout = new CustomLayoutBuilder(FileLocationIds.BACKENDC4, this.getClass()).instanciateLayout();
+
+        if (backendC4TabCustomLayout == null) {
+            logger.info("backendC4TabCustomLayout is null ");
+        } else {
+            backendC4TabCustomLayout.setIcon(new ThemeResource("img/BackendC4.JPG"));
+            logger.info("backendC4TabCustomLayout not  null ");
+        }
+
+
+    }
+
+
+    public void buildHomeIntro() {
+        logger.info(" going to buildHomeIntro ....");
+
+        homeTabCustomLayout.removeAllComponents();
+        logger.info("clear homeTabCustomLayout");
         BrowserFrame browser = new BrowserFrame();
         browser.setSource(new ExternalResource(homeUrl));
         browser.setAlternateText("browser");
@@ -112,100 +254,166 @@ public class MainUI extends UI {
         browser.setDescription("some description");
         browser.setSizeFull();
 
-        HomeTab.addComponent(browser);
+        logger.info("add component to  homeTabCustomLayout");
+        homeTabCustomLayout.addComponent(browser, CustomLayoutPool.browser_Loc);
 
 
-        homeTabsheet.addComponent(HomeTab);
+    }
 
-        HorizontalLayout ConsolesTab = new HorizontalLayout();
-        ConsolesTab.setMargin(true);
-        ConsolesTab.setSpacing(true);
-        ConsolesTab.setCaption("Consoles");
-        ConsolesTab.setSizeFull();
-        ConsolesTab.setHeight(DimensionPool.consolesTabHeight);
-        homeTabsheet.addComponent(ConsolesTab);
+    public void buildBackendC1() {
+        logger.info(" going to buildBackendC1  ...");
+
+        backendC1TabCustomLayout.removeAllComponents();
+        backendC1TabCustomLayout.setIcon(new ThemeResource("img/C1-Part1.png"));
+
+        VerticalLayout aVerticalLayout = new VerticalLayout();
+        aVerticalLayout.setCaption("buildBackendC1");
+        logger.info(" end of  buildBackendC1 !");
+    }
+
+    public void buildBackendC4() {
+        logger.info(" going to buildBackendC4  ...");
+        backendC4TabCustomLayout.removeAllComponents();
+        accessPointC3TabCustomLayout.setIcon(new ThemeResource("img/C4-Part3.JPG"));
+        accessPointC2TabCustomLayout.setIcon(new ThemeResource("img/C4-Part2.png"));
+        backendC4TabCustomLayout.setIcon(new ThemeResource("img/C4-Part1.png"));
+        backendC4TabCustomLayout.setIcon(new ThemeResource("img/C4-Part4.png"));
+
+
+        VerticalLayout aVerticalLayout = new VerticalLayout();
+        aVerticalLayout.setCaption("buildBackendC4");
+
+        backendC4TabCustomLayout.addComponent(aVerticalLayout, CustomLayoutPool.messagesSent_Loc);
+
+        VerticalLayout anotherVerticalLayout = new VerticalLayout();
+        aVerticalLayout.setCaption("submitMessage");
+
+        backendC4TabCustomLayout.addComponent(anotherVerticalLayout, CustomLayoutPool.submitMessage_Loc);
+
+
+    }
+
+    public void buildAccessPointC2() {
+        logger.info(" going to buildAccessPointC2  ...");
+
+        accessPointC2TabCustomLayout.removeAllComponents();
+        accessPointC2TabCustomLayout.setIcon(new ThemeResource("img/C2-Part2.png"));
+
+        backendC1TabCustomLayout.setIcon(new ThemeResource("img/C2-Part1.png"));
+        accessPointC3TabCustomLayout.setIcon(new ThemeResource("img/C2-Part3.png"));
+        backendC4TabCustomLayout.setIcon(new ThemeResource("img/C2-Part4.png"));
+
+        FourCornerModelTabSheet.getSelectedTab().setIcon(new ThemeResource("img/C2-Part2.png"));
+
+
+        VerticalLayout aVerticalLayout = new VerticalLayout();
+        aVerticalLayout.setCaption("buildAccessPointC2");
+
+        accessPointC2TabCustomLayout.addComponent(aVerticalLayout, CustomLayoutPool.messagesSent_Loc);
+
+        VerticalLayout anotherVerticalLayout = new VerticalLayout();
+        aVerticalLayout.setCaption("submitMessage");
+
+        accessPointC2TabCustomLayout.addComponent(anotherVerticalLayout, CustomLayoutPool.submitMessage_Loc);
+    }
+
+    public void buildAccessPointC3() {
+        logger.info(" going to buildAccessPointC3  ...");
+
+        accessPointC3TabCustomLayout.removeAllComponents();
+        accessPointC3TabCustomLayout.setIcon(new ThemeResource("img/C3-Part3.png"));
+        accessPointC2TabCustomLayout.setIcon(new ThemeResource("img/C3-Part2.png"));
+        backendC4TabCustomLayout.setIcon(new ThemeResource("img/C3-Part1.png"));
+        backendC4TabCustomLayout.setIcon(new ThemeResource("img/C3-Part4.png"));
+
+        FourCornerModelTabSheet.getSelectedTab().setIcon(new ThemeResource("img/C3-Part3.png"));
+
+
+        VerticalLayout aVerticalLayout = new VerticalLayout();
+        aVerticalLayout.setCaption("buildAccessPointC3");
+
+        accessPointC3TabCustomLayout.addComponent(aVerticalLayout, CustomLayoutPool.messagesSent_Loc);
+
+        VerticalLayout anotherVerticalLayout = new VerticalLayout();
+        aVerticalLayout.setCaption("submitMessage");
+
+        accessPointC3TabCustomLayout.addComponent(anotherVerticalLayout, CustomLayoutPool.submitMessage_Loc);
+
+    }
+
+
+    public void buildConsolesTab() {
+
+        logger.info(" going to buildConsolesTab  ...");
+        initConsolesCustomLayouts();
+
+        secondCustomLayout.removeAllComponents();
+
+        FourCornerModelTabSheet = new TabSheet();
+
+        FourCornerModelTabSheet.setSizeFull();
+        FourCornerModelTabSheet.setResponsive(true);
+
+        secondCustomLayout.addComponent(FourCornerModelTabSheet, CustomLayoutPool.fourCornerModelTabSheet_Loc);
+
+
+        FourCornerModelTabSheet.addTab(backendC1TabCustomLayout, StringPool.BackendC1_Caption, new ThemeResource("img/C1-Part1_Resized.png"));
+        FourCornerModelTabSheet.addTab(accessPointC2TabCustomLayout, StringPool.AccessPointC2_Caption,new ThemeResource("img/C1-Part2_Resized.png"));
+        FourCornerModelTabSheet.addTab(accessPointC3TabCustomLayout, StringPool.AccessPointC3_Caption,new ThemeResource("img/C1-Part3_Resized.png"));
+        FourCornerModelTabSheet.addTab(backendC4TabCustomLayout, StringPool.BackendC4_Caption,new ThemeResource("img/C1-Part4_Resized.png"));
+
+
+        buildBackendC1();
+
+
+        FourCornerModelTabSheet.addSelectedTabChangeListener(new TabSheet.SelectedTabChangeListener() {
+
+            public void selectedTabChange(TabSheet.SelectedTabChangeEvent selectedTabChangeEvent) {
+                TabSheet tabsheet = selectedTabChangeEvent.getTabSheet();
+                Layout selectedTab = (Layout) tabsheet.getSelectedTab();
+
+                String caption = tabsheet.getTab(selectedTab).getCaption();
+
+                if (caption.equalsIgnoreCase(StringPool.BackendC1_Caption)) {
+                    logger.info(" case : buildBackendC1 ");
+                    buildBackendC1();
+
+                } else if (caption.equalsIgnoreCase(StringPool.AccessPointC2_Caption)) {
+                    logger.info(" case : buildAccessPointC2 ");
+                    buildAccessPointC2();
+
+                } else if (caption.equalsIgnoreCase(StringPool.AccessPointC3_Caption)) {
+                    logger.info(" case : buildAccessPointC3 ");
+                    buildAccessPointC3();
+
+                } else if (caption.equalsIgnoreCase(StringPool.BackendC4_Caption)) {
+                    logger.info(" case : buildBackendC4 ");
+                    buildBackendC4();
+                }
+
+            }
+        });
+
+
+        logger.info(" end of  buildConsolesTab !");
+
+    }
+
+
+    public void buildContactPage() {
+        logger.info(" going to buildContactPage  ...");
+
+        thirdCustomLayout.removeAllComponents();
 
         VerticalLayout ContactTab = new VerticalLayout();
         ContactTab.setMargin(true);
         ContactTab.setSpacing(true);
         ContactTab.setCaption("Contact");
         ContactTab.setHeight(DimensionPool.pageHeight);
-        homeTabsheet.addComponent(ContactTab);
+
+        thirdCustomLayout.addComponent(ContactTab, "contact_loc");
 
 
-        ConsolesTab.setMargin(true);
-
-        TabSheet topTabsheet = new TabSheet();
-        topTabsheet.setSizeFull();
-
-        ConsolesTab.addComponent(topTabsheet);
-
-        ConsolesTab.setSizeFull();
-
-        // Create the first tab
-        LOG.info(" Create the first tab, going to add setBackendTabC1 ");
-        VerticalLayout BackendC1Tab = new VerticalLayout();
-        BackendC1Tab.setSizeFull();
-        BackendC1Tab.setIcon(new ThemeResource("img/BackendC1.JPG"));
-
-        BackendC1Tab.setHeight(DimensionPool.pageHeight);
-
-        //setBackendTabC1(BackendC1Tab);
-        setBackendTabC1(BackendC1Tab);
-        topTabsheet.addTab(BackendC1Tab);
-
-
-        // Create the secondTab
-        VerticalLayout AccessPointC2Tab = new VerticalLayout();
-        AccessPointC2Tab.setSizeFull();
-        AccessPointC2Tab.setIcon(new ThemeResource("img/AccessPointC2.JPG"));
-
-        AccessPointC2Tab.setHeight(DimensionPool.pageHeight);
-        setAccessPointC2(AccessPointC2Tab);
-
-        topTabsheet.addTab(AccessPointC2Tab);
-
-
-        BrowserWindowOpener popupOpener = new BrowserWindowOpener(MyPopupUI.class);
-
-        popupOpener.setFeatures("height=1200,width=1200");
-
-
-        HomeTab.addComponent(browser);
-
-        // Create the third tab
-        VerticalLayout AccessPointC3Tab = new VerticalLayout();
-        AccessPointC3Tab.setIcon(new ThemeResource("img/AccessPointC3.JPG"));
-
-        topTabsheet.addTab(AccessPointC3Tab);
-        AccessPointC3Tab.setHeight(DimensionPool.pageHeight);
-
-
-        BrowserFrame AccessPointC3TabBrowser = new BrowserFrame();
-        AccessPointC3TabBrowser.setSource(new ExternalResource(AccesspointC3URL));
-        AccessPointC3TabBrowser.setAlternateText("browser");
-        AccessPointC3TabBrowser.setCaptionAsHtml(true);
-        AccessPointC3TabBrowser.setImmediate(true);
-        AccessPointC3TabBrowser.setDescription("some description");
-        AccessPointC3TabBrowser.setSizeFull();
-        AccessPointC3TabBrowser.setHeight(DimensionPool.pageHeight);
-
-
-        AccessPointC3Tab.addComponent(AccessPointC3TabBrowser);
-
-
-        // Create the fourth  tab
-        VerticalLayout BackendC4Tab = new VerticalLayout();
-        BackendC4Tab.setIcon(new ThemeResource("img/BackendC4.JPG"));
-        setBackendTabC4(BackendC4Tab);
-
-        topTabsheet.addTab(BackendC4Tab).setCaption("");
-
-
-        layout.setMargin(true);
-        layout.setSpacing(true);
-
-        setContent(layout);
     }
 
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
@@ -316,33 +524,35 @@ public class MainUI extends UI {
             messageLogVerticalLayout.addComponent(filterTable.createControls(new PagedFilterControlConfig()));
 
 
-            LOG.info("table construction is finnished ");
+            logger.info("table construction is finnished ");
 
         } catch (SQLException e) {
-            LOG.error("SQLException error " + e.getMessage());
+            logger.error("SQLException error " + e.getMessage());
         } catch (UnsupportedOperationException e) {
-            LOG.error("UnsupportedOperationException error " + e.getMessage());
+            logger.error("UnsupportedOperationException error " + e.getMessage());
 
         } catch (Exception e) {
-            LOG.error("db error " + e.getMessage());
+            logger.error("db error " + e.getMessage());
         }
 
 
     }
 
-    public void setBackendTabC1(VerticalLayout aVerticalLayout) {
-        LOG.info("setBackendTabC1");
+    public void setBackendTabC1(CustomLayout aVerticalLayout) {
+        logger.info("setBackendTabC1");
 
-        LOG.info("going to add sendMessagePanel");
+        logger.info("going to add sendMessagePanel");
         sendMessagePanel(aVerticalLayout);
 
-        setMessagesSentC1(aVerticalLayout);
+        //setMessagesSentC1(aVerticalLayout);
     }
 
 
-    public void sendMessagePanel(VerticalLayout aVerticalLayout) {
+    public void sendMessagePanel(CustomLayout aVerticalLayout) {
 
-        LOG.info("sendMessagePanel ");
+        logger.info("sendMessagePanel ");
+
+        aVerticalLayout = new CustomLayout("C1layout.html");
 
         VerticalLayout topC1BackendText = new VerticalLayout();
         topC1BackendText.setMargin(true);
@@ -355,29 +565,35 @@ public class MainUI extends UI {
         aVerticalLayout.addComponent(topC1BackendText);
 
 
-        aVerticalLayout.setComponentAlignment(topC1BackendText, Alignment.TOP_RIGHT);
+        //aVerticalLayout.setComponentAlignment(topC1BackendText, Alignment.TOP_RIGHT);
 
-        HorizontalLayout messagePropertiesValue = new HorizontalLayout();
-        messagePropertiesValue.setWidthUndefined();
+//        HorizontalLayout messagePropertiesValue = new HorizontalLayout();
+//        messagePropertiesValue.setWidthUndefined();
+//
+//        messagePropertiesValue.setSpacing(true);
+//        messagePropertiesValue.addComponent(new Label(StringPool.MessagePropertieslabel));
+//        messagePropertiesValue.addComponent(new Label(StringPool.Valuelabel));
 
-        messagePropertiesValue.setSpacing(true);
-        messagePropertiesValue.addComponent(new Label(StringPool.MessagePropertieslabel));
-        messagePropertiesValue.addComponent(new Label(StringPool.Valuelabel));
-
-        aVerticalLayout.addComponent(messagePropertiesValue);
-        aVerticalLayout.setComponentAlignment(messagePropertiesValue, Alignment.TOP_RIGHT);
+//        aVerticalLayout.addComponent(messagePropertiesValue);
+        //aVerticalLayout.setComponentAlignment(messagePropertiesValue, Alignment.TOP_RIGHT);
 
 
-        HorizontalLayout aMessageAndPmodeHorizontalLayout = new HorizontalLayout();
-        aMessageAndPmodeHorizontalLayout.setWidthUndefined();
+//        HorizontalLayout aMessageAndPmodeHorizontalLayout = new HorizontalLayout();
+//        aMessageAndPmodeHorizontalLayout.setWidthUndefined();
 
 
         final Label messageSentLabel = new Label(StringPool.MessageIDLabel);
         final Label messageSentID = new Label();
         messageSentID.setCaption(StringPool.DashLine);
 
+        aVerticalLayout.addComponent(messageSentLabel, CustomLayoutPool.MessageIDLabel_Loc);
+
+
         final Label messageErrorLabel = new Label(StringPool.ErrorLabel);
         final Label messageErrorID = new Label("-----------------------------------");
+
+        aVerticalLayout.addComponent(messageErrorLabel, CustomLayoutPool.MessageErrorLabel_Loc);
+        aVerticalLayout.addComponent(messageErrorID, CustomLayoutPool.MessageErrorId_Loc);
 
         HorizontalLayout aResultHorizontalLayout = new HorizontalLayout();
         aResultHorizontalLayout.setHeightUndefined();
@@ -402,50 +618,51 @@ public class MainUI extends UI {
         fromPartyIDComboBox.setValue(FromPartyID.cefsupportID01);
         aFromPartyHorizontalLayout.addComponent(fromPartyIDComboBox);
         aVerticalLayout.addComponent(aFromPartyHorizontalLayout);
-        aVerticalLayout.setComponentAlignment(aFromPartyHorizontalLayout, Alignment.TOP_RIGHT);
+        //aVerticalLayout.setComponentAlignment(aFromPartyHorizontalLayout, Alignment.TOP_RIGHT);
 
-
-        HorizontalLayout aToPartyHorizontalLayout = new HorizontalLayout();
-
-        aToPartyHorizontalLayout.setWidthUndefined();
-        aToPartyHorizontalLayout.addComponent(new Label(StringPool.ToPartyIDLabel));
-        aToPartyHorizontalLayout.setHeightUndefined();
-
-
-        // Prepare the itemList
-        List<PartyID> PartyIDList = new ArrayList<PartyID>();
-        PartyIDList.add(new PartyID(StringPool.ceftestparty1ID01));
-        PartyIDList.add(new PartyID(StringPool.ceftestparty1ID02));
-
-        final ComboBox toPartyIDComboBox = new ComboBox();
-        toPartyIDComboBox.setInvalidAllowed(false);
-        toPartyIDComboBox.setNullSelectionAllowed(false);
-        toPartyIDComboBox.setImmediate(true);
-        toPartyIDComboBox.addItem(toPartyID.ceftestparty1ID01);
-        toPartyIDComboBox.addItem(toPartyID.ceftestparty1ID02);
-
-
-        toPartyIDComboBox.setValue(toPartyID.ceftestparty1ID01);
-        aToPartyHorizontalLayout.addComponent(toPartyIDComboBox);
-        aVerticalLayout.addComponent(aToPartyHorizontalLayout);
-        aVerticalLayout.setComponentAlignment(aToPartyHorizontalLayout, Alignment.TOP_RIGHT);
-
-
-        final Label MessagePayloadLabel= new Label(StringPool.MessagePayloadLabel);
-        aVerticalLayout.addComponent(MessagePayloadLabel);
-        aVerticalLayout.setComponentAlignment(MessagePayloadLabel, Alignment.TOP_LEFT);
-
-        final TextArea messagePayloadTextArea  = new TextArea();
-        messagePayloadTextArea.setValue("hello world");
-        messagePayloadTextArea.setRows(5);
-        messagePayloadTextArea.setColumns(20);
-
-        messagePayloadTextArea.setImmediate(true);
-        messagePayloadTextArea.setWordwrap(true);
-
-        aVerticalLayout.addComponent(messagePayloadTextArea);
-        aVerticalLayout.setComponentAlignment(messagePayloadTextArea, Alignment.TOP_RIGHT);
-
+//
+//        HorizontalLayout aToPartyHorizontalLayout = new HorizontalLayout();
+//
+//        aToPartyHorizontalLayout.setWidthUndefined();
+//        aToPartyHorizontalLayout.addComponent(new Label(StringPool.ToPartyIDLabel));
+//        aToPartyHorizontalLayout.setHeightUndefined();
+//
+//
+//        // Prepare the itemList
+//        List<PartyID> PartyIDList = new ArrayList<PartyID>();
+//        PartyIDList.add(new PartyID(StringPool.ceftestparty1ID01));
+//        PartyIDList.add(new PartyID(StringPool.ceftestparty1ID02));
+//
+//        final ComboBox toPartyIDComboBox = new ComboBox();
+//        toPartyIDComboBox.setInvalidAllowed(false);
+//        toPartyIDComboBox.setNullSelectionAllowed(false);
+//        toPartyIDComboBox.setImmediate(true);
+//        toPartyIDComboBox.addItem(toPartyID.ceftestparty1ID01);
+//        toPartyIDComboBox.addItem(toPartyID.ceftestparty1ID02);
+//
+//
+//        toPartyIDComboBox.setValue(toPartyID.ceftestparty1ID01);
+//        aToPartyHorizontalLayout.addComponent(toPartyIDComboBox);
+//        aVerticalLayout.addComponent(aToPartyHorizontalLayout);
+//        aVerticalLayout.setComponentAlignment(aToPartyHorizontalLayout, Alignment.TOP_RIGHT);
+//
+//
+//        final Label MessagePayloadLabel= new Label(StringPool.MessagePayloadLabel);
+//        aVerticalLayout.addComponent(MessagePayloadLabel);
+//        aVerticalLayout.setComponentAlignment(MessagePayloadLabel, Alignment.TOP_LEFT);
+//
+//        final TextArea messagePayloadTextArea  = new TextArea();
+//        messagePayloadTextArea.setValue("hello world");
+//        messagePayloadTextArea.setRows(5);
+//        messagePayloadTextArea.setColumns(20);
+//
+//        messagePayloadTextArea.setImmediate(true);
+//        messagePayloadTextArea.setWordwrap(true);
+//
+//        aVerticalLayout.addComponent(messagePayloadTextArea);
+//        aVerticalLayout.setComponentAlignment(messagePayloadTextArea, Alignment.TOP_RIGHT);
+//
+/*
 
         final Button sendMessageButton = new Button(StringPool.SendMessageLabel);
 
@@ -459,13 +676,13 @@ public class MainUI extends UI {
             public void buttonClick(ClickEvent event) {
                 sendMessageButton.setCaption("Send Message");
                 try {
-                    LOG.info("fromPartyIDComboBox :" + fromPartyIDComboBox.getValue().toString() + toPartyIDComboBox.getValue()+", messagePayloadTextArea : " + messagePayloadTextArea.getValue());
+                    logger.info("fromPartyIDComboBox :" + fromPartyIDComboBox.getValue().toString() + toPartyIDComboBox.getValue()+", messagePayloadTextArea : " + messagePayloadTextArea.getValue());
                     response = sendMessage2wsdl(messagePayloadTextArea.getValue(), SenderWSDL, fromPartyIDComboBox.getValue().toString(), toPartyIDComboBox.getValue().toString());
                 } catch (Exception e) {
                     e.printStackTrace();
                     messageSentID.setCaption(" Message has not yet sent");
                 }
-                LOG.info("main" + " - messageId: " + response.getMessageID().get(0));
+                logger.info("main" + " - messageId: " + response.getMessageID().get(0));
                 messageSentID.setCaption(response.getMessageID().get(0));
             }
         });
@@ -507,7 +724,7 @@ public class MainUI extends UI {
     }
 
     public void setBackendTabC4(VerticalLayout aVerticalLayout) {
-        LOG.info("setBackendTabC4 ");
+        logger.info("setBackendTabC4 ");
 
         final TextField textField = new TextField();
         final Label messageSentLabel = new Label("Message ID  :");
@@ -539,19 +756,20 @@ public class MainUI extends UI {
         aVerticalLayout.addComponent(button);
         aVerticalLayout.addComponent(messageSentLabel);
         aVerticalLayout.addComponent(messageSentID);
+*/
 
 
     }
 
 
-    public static SendResponse sendMessage2wsdl(String  payloadStr, String wsdlStr, String senderStr, String recepientStr) throws Exception {
+    public static SendResponse sendMessage2wsdl(String payloadStr, String wsdlStr, String senderStr, String recepientStr) throws Exception {
         URL wsdlURL = new URL(wsdlStr);
         QName SERVICE_NAME = new QName("http://org.ecodex.backend/1_1/", "BackendService_1_1");
         Service service = Service.create(wsdlURL, SERVICE_NAME);
         BackendInterface client = service.getPort(BackendInterface.class);
         String payloadHref = "cid:message";
 
-        SendRequest sendRequest = createSendRequest(payloadHref,  payloadStr);
+        SendRequest sendRequest = createSendRequest(payloadHref, payloadStr);
 
         Messaging ebMSHeaderInfo = createMessage_sender_2_recipient(payloadHref, null, senderStr, recepientStr);
 
@@ -560,7 +778,7 @@ public class MainUI extends UI {
     }
 
 
-    protected static SendRequest createSendRequest(String payloadHref,  String payloadStr) {
+    protected static SendRequest createSendRequest(String payloadHref, String payloadStr) {
         SendRequest sendRequest = new SendRequest();
         PayloadType payload = new PayloadType();
         payload.setPayloadId(payloadHref);

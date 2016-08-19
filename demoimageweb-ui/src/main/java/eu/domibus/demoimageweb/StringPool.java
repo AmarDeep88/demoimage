@@ -5,6 +5,15 @@ package eu.domibus.demoimageweb;
  */
 public class StringPool {
 
+    public static final String Home_Caption = "Home";
+    public static final String Consoles_Caption = "Consoles";
+    public static final String Contact_Caption = "Contact";
+
+    public static final String BackendC1_Caption = "BackendC1";
+    public static final String AccessPointC2_Caption = "AccessPointC2";
+    public static final String AccessPointC3_Caption = "AccessPointC3";
+    public static final String BackendC4_Caption = "BackendC4";
+
     public static final String C1PartyIDStr = "cefsupportID01";
     public static final String C4PartyIDStr = "ceftestparty1ID01";
 
@@ -71,6 +80,8 @@ public class StringPool {
         //"tbPartInfo.BINARY_DATA      AS \"CONTENT\" "+
 
     public static final String QuerytbMessageLogStr ="SELECT  tbMessageLog.MESSAGE_ID FROM   TB_MESSAGE_LOG tbMessageLog";
+
+
 
 
 }

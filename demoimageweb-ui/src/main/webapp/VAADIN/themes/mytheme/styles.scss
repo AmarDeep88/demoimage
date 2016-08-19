@@ -9,3 +9,74 @@
   @include mytheme;
 
 }
+
+
+.v-menubar .v-menubar-menuitem {
+  cursor: pointer;
+  font-weight: bold;
+}
+#app{
+  //background-color: yellowgreen ;
+  width:100%;
+  border-color: red;
+  align-content: center;
+
+}
+
+#FourCornerModelTabSheet{
+  alignment: center;
+  //width: auto;
+  width:1244px;
+  height:423px ;
+
+  align-content: center;
+  //background-color: aqua;
+  margin: auto;
+  padding-left: 200px;
+  text-align: center;
+  padding-right: 200px;
+  //border: 3px solid green;
+
+
+}
+#left{
+  width: 500px;
+}
+#homeTabSheet{
+  width: 100%;
+  height: auto;
+  margin: auto;
+  padding: 100px;
+}
+#right{
+  width: 500px;
+}
+
+#browser{
+  width:1600px;
+  height: 3200px ;
+
+}
+.zone-table{
+  width:1920px;
+  //border: double;
+  //background-color: blueviolet;
+}
+
+#FourCornerModelTabSheet .v-tabsheet-tabitem {
+  width: 211px;
+  //height: 375px;
+  padding: 0px;
+  margin: 0px;
+}
+
+
+.mytheme .v-tabsheet-tabitemcell .v-caption {
+  margin-left: 0px;
+}
+
+.mytheme .v-tabsheet-tabitemcell .v-tabsheet-tabitem-selected .v-caption.v-caption {
+  border-top-color:#197de1;
+  border-color: #197de1;
+
+}
